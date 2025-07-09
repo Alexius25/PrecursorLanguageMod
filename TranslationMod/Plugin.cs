@@ -30,7 +30,8 @@ internal class TranslationMod : BaseUnityPlugin
         LanguageManager.Load();
 
         // Example usage
-        string translation = LanguageManager.GetTranslation("Test");
+        string translation = LanguageManager.GetTranslation("Hello");
+        PluginLogger.LogInfo($"Translation: {translation}");
         LanguageHandler.SetLanguageLine("EncyPath_Welcome", translation);
         
         Harmony.CreateAndPatchAll(typeof(Patches.uGUI_PDAPatches_TranslationTab), PluginInfo.PLUGIN_GUID);

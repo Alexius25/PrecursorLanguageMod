@@ -17,12 +17,15 @@ namespace TranslationMod.Handlers
 
         internal class PrecursorWord
         {
+            [JsonProperty("precursor")]
             internal string Precursor;
+            [JsonProperty("translation")]
             internal string Translation;
         }
 
         internal class PrecursorLanguage
         {
+            [JsonProperty("words")]
             internal List<PrecursorWord> Words = new();
         }
 
