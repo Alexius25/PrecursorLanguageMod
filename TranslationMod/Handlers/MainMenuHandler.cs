@@ -20,7 +20,8 @@ namespace TranslationMod.Handlers
             }
 
             var objectTitleAddon = new WorldObjectTitleAddon(SpawnGameObject, 5f);
-            var titleData = new TitleScreenHandler.CustomTitleData("ExampleMenuName", objectTitleAddon);
+            var musicTitleAddon = new MusicTitleAddon(TranslationMod.SoundBundle.LoadAsset<FMODAsset>("TitleMusic"));
+            var titleData = new TitleScreenHandler.CustomTitleData("TranslationModMenu", objectTitleAddon, musicTitleAddon);
 
             TitleScreenHandler.RegisterTitleScreenObject(plugin, titleData);
         }

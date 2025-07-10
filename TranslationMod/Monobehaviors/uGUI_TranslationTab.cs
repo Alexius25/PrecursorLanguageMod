@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System.Linq;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using TranslationMod.Handlers;
@@ -38,7 +40,8 @@ namespace TranslationMod.Monobehaviors
             label.name = "TranslationTabLabel";
             label.GetComponent<TextMeshProUGUI>().text = Language.main.Get("TranslationTabLabel");
             GetComponentInChildren<RectMask2D>().enabled = true;
-
+            
+            RegisterSortButtons();
             RegisterHeaders();
             RegisterWords();
         }
@@ -57,10 +60,13 @@ namespace TranslationMod.Monobehaviors
         private void RegisterWords()
         {
             foreach (var word in LanguageManager.GetAllWords())
-            {
+            { 
                 // Column for each word
-                GameObject row = new GameObject("TranslationRow", typeof(RectTransform));
+                GameObject row = new GameObject("TranslationRow", typeof(RectTransform), typeof(Image));
                 row.transform.SetParent(scrollCanvas, false);
+                var image = row.GetComponent<Image>();
+                image.sprite = TranslationMod.TranslateTabBackGroundSprite;
+                image.type = Image.Type.Sliced;
                 var rowLayout = row.AddComponent<HorizontalLayoutGroup>(); 
                 rowLayout.spacing = 10; 
                 rowLayout.childForceExpandWidth = false; 
@@ -172,6 +178,92 @@ namespace TranslationMod.Monobehaviors
             inputHeaderTMP.color = Color.cyan;
             inputHeaderTMP.alignment = TextAlignmentOptions.Center;
             inputHeader.AddComponent<LayoutElement>().preferredWidth = 300;
+        }
+        
+        private void RegisterSortButtons()
+        {
+            GameObject sortRow = new GameObject("SortButtonsRow", typeof(RectTransform));
+            sortRow.transform.SetParent(scrollCanvas.parent, false);
+            var hLayout = sortRow.AddComponent<HorizontalLayoutGroup>();
+            hLayout.spacing = 10;
+            hLayout.childAlignment = TextAnchor.MiddleCenter;
+            sortRow.AddComponent<LayoutElement>().preferredHeight = 40;
+
+            var btnAZ = CreateButton("SortAZButton", "A-Z", sortRow.transform);
+            btnAZ.onClick.AddListener(SortByTranslationAZ);
+
+            var btnTrans = CreateButton("SortTranslationButton", "Untranslated First", sortRow.transform);
+            btnTrans.onClick.AddListener(SortByMissingTranslationFirst);
+        }
+
+        private void SortByTranslationAZ()
+        {
+            var rows = scrollCanvas.Cast<Transform>()
+                .Where(t => t.name == "TranslationRow")
+                .OrderBy(t =>
+                {
+                    var text = t.Find("TranslationLabel")
+                        .GetComponent<TextMeshProUGUI>()
+                        .text;
+                    return string.IsNullOrEmpty(text) ? 1 : 0;
+                })
+                .ThenBy(t =>
+                    t.Find("TranslationLabel")
+                        .GetComponent<TextMeshProUGUI>()
+                        .text)
+                .ToList();
+            ReorderRows(rows);
+        }
+
+        private void SortByMissingTranslationFirst()
+        {
+            var rows = scrollCanvas.Cast<Transform>()
+                .Where(t => t.name == "TranslationRow")
+                .OrderBy(t =>
+                {
+                    var text = t.Find("TranslationLabel")
+                        .GetComponent<TextMeshProUGUI>()
+                        .text;
+                    return string.IsNullOrEmpty(text) ? 0 : 1;
+                })
+                .ThenBy(t =>
+                    t.Find("TranslationLabel")
+                        .GetComponent<TextMeshProUGUI>()
+                        .text)
+                .ToList();
+            ReorderRows(rows);
+        }
+        
+        private Button CreateButton(string name, string label, Transform parent)
+        {
+            GameObject btnGO = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+            btnGO.transform.SetParent(parent, false);
+            var img = btnGO.GetComponent<Image>();
+            img.color = Color.grey;
+
+            GameObject textGO = new GameObject("Text", typeof(RectTransform));
+            textGO.transform.SetParent(btnGO.transform, false);
+            var tmp = textGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = label;
+            tmp.fontSize = 20;
+            tmp.color = Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+            var rt = textGO.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+
+            return btnGO.GetComponent<Button>();
+        }
+
+        private void ReorderRows(List<Transform> sortedRows)
+        {
+            var header = scrollCanvas.Find("HeaderRow");
+            if (header != null)
+                header.SetAsFirstSibling();
+
+            for (int i = 0; i < sortedRows.Count; i++)
+                sortedRows[i].SetSiblingIndex(i + 1);
         }
     }
 }

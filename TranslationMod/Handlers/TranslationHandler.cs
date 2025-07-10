@@ -8,14 +8,14 @@ namespace TranslationMod.Handlers
 {
     internal static class Paths
     {
-        public static string PluginPath => AppDomain.CurrentDomain.BaseDirectory;
+        internal static string PluginPath => AppDomain.CurrentDomain.BaseDirectory;
     }
 
-    internal static class LanguageManager
+    public static class LanguageManager
     {
         private static string JsonFilePath => Path.Combine(Paths.PluginPath,"BepInEx", "plugins", "TranslationMod", "Data", TranslationMod.JsonFileName);
 
-        internal class PrecursorWord
+        public class PrecursorWord
         {
             [JsonProperty("precursor")]
             internal string Precursor;
@@ -23,7 +23,7 @@ namespace TranslationMod.Handlers
             internal string Translation;
         }
 
-        internal class PrecursorLanguage
+        public class PrecursorLanguage
         {
             [JsonProperty("words")]
             internal List<PrecursorWord> Words = new();
@@ -31,18 +31,18 @@ namespace TranslationMod.Handlers
 
         private static PrecursorLanguage _languageData = new();
 
-        internal static void Load()
+        public static void Load()
         {
             if (!File.Exists(JsonFilePath))
             {
-                TranslationMod.PluginLogger.LogWarning($"[LanguageManager] JSON file not found at: {JsonFilePath}");
+                TranslationMod.PluginLogger.LogWarning($"[Precursor-LanguageManager] JSON file not found at: {JsonFilePath}");
                 _languageData = new PrecursorLanguage();
                 return;
             }
 
             string json = File.ReadAllText(JsonFilePath);
             _languageData = JsonConvert.DeserializeObject<PrecursorLanguage>(json);
-            TranslationMod.PluginLogger.LogInfo($"[LanguageManager] Loaded {_languageData.Words.Count} words from JSON.");
+            TranslationMod.PluginLogger.LogInfo($"[Precursor-LanguageManager] Loaded {_languageData.Words.Count} words from JSON.");
         }
 
         private static void Save()
@@ -50,10 +50,10 @@ namespace TranslationMod.Handlers
             string json = JsonConvert.SerializeObject(_languageData, Formatting.Indented);
             Directory.CreateDirectory(Path.GetDirectoryName(JsonFilePath));
             File.WriteAllText(JsonFilePath, json);
-            TranslationMod.PluginLogger.LogInfo("[LanguageManager] Saved language data.");
+            TranslationMod.PluginLogger.LogInfo("[Precursor-LanguageManager] Saved language data.");
         }
 
-        internal static string GetTranslation(string precursorWord)
+        public static string GetTranslation(string precursorWord)
         {
             var entry = _languageData.Words.FirstOrDefault(w => w.Precursor == precursorWord);
             return entry != null && !string.IsNullOrEmpty(entry.Translation)
@@ -61,13 +61,13 @@ namespace TranslationMod.Handlers
                 : precursorWord;
         }
 
-        internal static bool IsTranslated(string precursorWord)
+        public static bool IsTranslated(string precursorWord)
         {
             var entry = _languageData.Words.FirstOrDefault(w => w.Precursor == precursorWord);
             return entry != null && !string.IsNullOrEmpty(entry.Translation);
         }
 
-        internal static void SetTranslation(string precursorWord, string translation)
+        public static void SetTranslation(string precursorWord, string translation)
         {
             var entry = _languageData.Words.FirstOrDefault(w => w.Precursor == precursorWord);
             if (entry != null)
