@@ -29,7 +29,7 @@ namespace TranslationMod.Monobehaviors
             if (scrollCanvas.GetComponent<VerticalLayoutGroup>() == null)
             {
                 var vLayout = scrollCanvas.gameObject.AddComponent<VerticalLayoutGroup>();
-                vLayout.spacing = 5;
+                vLayout.spacing = 7.5f;
                 vLayout.childForceExpandHeight = false;
                 vLayout.childForceExpandWidth = true;
                 vLayout.childControlHeight = true;
@@ -41,8 +41,8 @@ namespace TranslationMod.Monobehaviors
             label.GetComponent<TextMeshProUGUI>().text = Language.main.Get("TranslationTabLabel");
             GetComponentInChildren<RectMask2D>().enabled = true;
             
-            RegisterSortButtons();
             RegisterHeaders();
+            RegisterSortButtons();
             RegisterWords();
         }
 
@@ -65,14 +65,14 @@ namespace TranslationMod.Monobehaviors
                 GameObject row = new GameObject("TranslationRow", typeof(RectTransform), typeof(Image));
                 row.transform.SetParent(scrollCanvas, false);
                 var image = row.GetComponent<Image>();
-                image.sprite = TranslationMod.TranslateTabBackGroundSprite;
+                image.sprite = TranslationMod.WordEntryBackground;
                 image.type = Image.Type.Sliced;
                 var rowLayout = row.AddComponent<HorizontalLayoutGroup>(); 
                 rowLayout.spacing = 10; 
                 rowLayout.childForceExpandWidth = false; 
                 rowLayout.childForceExpandHeight = false; 
                 rowLayout.childAlignment = TextAnchor.MiddleCenter; 
-                row.AddComponent<LayoutElement>().preferredHeight = 40;
+                row.AddComponent<LayoutElement>().preferredHeight = 60;
 
                 // Precursor-Label
                 GameObject precursorLabel = new GameObject("PrecursorLabel", typeof(RectTransform));
@@ -139,6 +139,7 @@ namespace TranslationMod.Monobehaviors
 
         private void RegisterHeaders()
         {
+            
             // Header Row
             GameObject headerRow = new GameObject("HeaderRow", typeof(RectTransform));
             headerRow.transform.SetParent(scrollCanvas, false);
@@ -183,7 +184,8 @@ namespace TranslationMod.Monobehaviors
         private void RegisterSortButtons()
         {
             GameObject sortRow = new GameObject("SortButtonsRow", typeof(RectTransform));
-            sortRow.transform.SetParent(scrollCanvas.parent, false);
+            sortRow.transform.SetParent(scrollCanvas, false);  // Hier scrollCanvas statt scrollCanvas.parent
+
             var hLayout = sortRow.AddComponent<HorizontalLayoutGroup>();
             hLayout.spacing = 10;
             hLayout.childAlignment = TextAnchor.MiddleCenter;
@@ -191,9 +193,16 @@ namespace TranslationMod.Monobehaviors
 
             var btnAZ = CreateButton("SortAZButton", "A-Z", sortRow.transform);
             btnAZ.onClick.AddListener(SortByTranslationAZ);
+            
+            var btnZA = CreateButton("SortZAButton", "Z-A", sortRow.transform);
+            btnZA.onClick.AddListener(SortByTranslationZA);
 
             var btnTrans = CreateButton("SortTranslationButton", "Untranslated First", sortRow.transform);
             btnTrans.onClick.AddListener(SortByMissingTranslationFirst);
+
+            var header = scrollCanvas.Find("HeaderRow");
+            if (header != null)
+                sortRow.transform.SetSiblingIndex(header.GetSiblingIndex() + 1);
         }
 
         private void SortByTranslationAZ()
@@ -208,6 +217,25 @@ namespace TranslationMod.Monobehaviors
                     return string.IsNullOrEmpty(text) ? 1 : 0;
                 })
                 .ThenBy(t =>
+                    t.Find("TranslationLabel")
+                        .GetComponent<TextMeshProUGUI>()
+                        .text)
+                .ToList();
+            ReorderRows(rows);
+        }
+        
+        private void SortByTranslationZA()
+        {
+            var rows = scrollCanvas.Cast<Transform>()
+                .Where(t => t.name == "TranslationRow")
+                .OrderBy(t =>
+                {
+                    var text = t.Find("TranslationLabel")
+                        .GetComponent<TextMeshProUGUI>()
+                        .text;
+                    return string.IsNullOrEmpty(text) ? 1 : 0;
+                })
+                .ThenByDescending(t =>
                     t.Find("TranslationLabel")
                         .GetComponent<TextMeshProUGUI>()
                         .text)
@@ -239,7 +267,7 @@ namespace TranslationMod.Monobehaviors
             GameObject btnGO = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             btnGO.transform.SetParent(parent, false);
             var img = btnGO.GetComponent<Image>();
-            img.color = Color.grey;
+            img.sprite = TranslationMod.ButtonBackground;
 
             GameObject textGO = new GameObject("Text", typeof(RectTransform));
             textGO.transform.SetParent(btnGO.transform, false);
@@ -262,8 +290,12 @@ namespace TranslationMod.Monobehaviors
             if (header != null)
                 header.SetAsFirstSibling();
 
+            var sortRow = scrollCanvas.Find("SortButtonsRow");
+            if (sortRow != null)
+                sortRow.SetSiblingIndex(1);
+
             for (int i = 0; i < sortedRows.Count; i++)
-                sortedRows[i].SetSiblingIndex(i + 1);
+                sortedRows[i].SetSiblingIndex(i + 2);
         }
     }
 }

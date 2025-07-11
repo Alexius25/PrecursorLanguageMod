@@ -82,6 +82,6 @@ namespace TranslationMod.Handlers
             Save();
         }
 
-        internal static List<PrecursorWord> GetAllWords() => _languageData.Words;
+        public static List<PrecursorWord> GetAllWords() => _languageData.Words;
     }
 }

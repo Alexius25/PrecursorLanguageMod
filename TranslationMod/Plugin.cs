@@ -23,7 +23,8 @@ internal class TranslationMod : BaseUnityPlugin
     
     internal static PDATab TranslateTab;
     internal static Atlas.Sprite TranslateTabSprite;
-    internal static Sprite TranslateTabBackGroundSprite;
+    internal static Sprite WordEntryBackground;
+    internal static Sprite ButtonBackground;
     
     private void Start()
     {
@@ -47,6 +48,7 @@ internal class TranslationMod : BaseUnityPlugin
         TranslateTabSprite = new Atlas.Sprite(AssetBundle.LoadAsset<Sprite>("TranslationTabSprite"));
         TranslateTabSprite.size = new Vector2(700, 700);
         
-        TranslateTabBackGroundSprite = AssetBundle.LoadAsset<Sprite>("FrameSprite");
+        WordEntryBackground = AssetBundle.LoadAsset<Sprite>("FrameSprite2");
+        ButtonBackground = AssetBundle.LoadAsset<Sprite>("FrameSprite3");
     }
 }
