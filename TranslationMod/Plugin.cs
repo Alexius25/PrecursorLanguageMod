@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using Nautilus.Utility;
 using Nautilus.Handlers;
+using Nautilus.Utility.ModMessages;
 using System.Reflection;
 using HarmonyLib;
 using TranslationMod.Handlers;
@@ -10,6 +11,7 @@ using UnityEngine;
 namespace TranslationMod;
 
 [BepInPlugin("com.Alexius25.TranslationMod", "TranslationMod", "1.0.0")]
+[BepInDependency("com.snmodding.nautilus")]
 internal class TranslationMod : BaseUnityPlugin
 {
     private static Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
@@ -22,13 +24,17 @@ internal class TranslationMod : BaseUnityPlugin
     internal static ManualLogSource PluginLogger { get; private set; }
     
     internal static PDATab TranslateTab;
+    
     internal static Atlas.Sprite TranslateTabSprite;
     internal static Sprite WordEntryBackground;
     internal static Sprite ButtonBackground;
     
     private void Start()
     {
+        // Instance project logger
         PluginLogger = base.Logger;
+        
+        ModMessageSystem.SendGlobal("FindMyUpdates", "https://raw.githubusercontent.com/Alexius25/PrecursorLanguageMod/refs/heads/main/FMUInfo.json");
         
         TranslateTab = EnumHandler.AddEntry<PDATab>("Translation");
         CachePrefabs();
