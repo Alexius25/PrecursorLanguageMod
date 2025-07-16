@@ -19,12 +19,10 @@ internal class TranslationMod : BaseUnityPlugin
     internal static AssetBundle AssetBundle { get; set; } = AssetBundleLoadingUtils.LoadFromAssetsFolder(TranslationMod.Assembly, "translationmod");
     internal static AssetBundle SoundBundle { get; set; } = AssetBundleLoadingUtils.LoadFromAssetsFolder(TranslationMod.Assembly, "translationmodsounds");
     
-    internal static string JsonFileName => "precursor_language.json";
-    
     internal static ManualLogSource PluginLogger { get; private set; }
     
     internal static PDATab TranslateTab;
-    
+
     internal static Atlas.Sprite TranslateTabSprite;
     internal static Sprite WordEntryBackground;
     internal static Sprite ButtonBackground;
@@ -43,7 +41,7 @@ internal class TranslationMod : BaseUnityPlugin
         LanguageHandler.SetLanguageLine("TranslationTabLabel", "Translation");
         
         //MainMenuHandler.Register(this);
-        LanguageManager.Load();
+        LanguageManager.Load("TranslationMod/Data/precursor_language.json");
         
         Harmony.CreateAndPatchAll(typeof(Patches.uGUI_PDAPatches_TranslationTab), PluginInfo.PLUGIN_GUID);
         PluginLogger.LogInfo("TranslationMod has been loaded successfully.");
